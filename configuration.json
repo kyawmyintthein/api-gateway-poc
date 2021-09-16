@@ -1,110 +1,290 @@
 {
     "version": 2,
-    "name": "My lovely gateway",
-    "port": 8081,
-    "timeout": "10s",
-    "cache_ttl": "3600s",
-    "host": [
-        "http://127.0.0.1:8080",
-        "http://127.0.0.2:8000",
-        "http://127.0.0.3:9000",
-        "http://127.0.0.4"
-    ],
+    "timeout": "3000ms",
+    "cache_ttl": "300s",
+    "debug": true,
+    "port": 8000,
+    "extra_config": {
+        "github_com/devopsfaith/krakend-metrics": {
+            "collection_time": "30s",
+            "listen_address": ":8090"
+        },
+        "github_com/letgoapp/krakend-influx": {
+            "address": "http://influxdb:8086",
+            "ttl": "25s"
+        },
+        "github_com/devopsfaith/krakend-gologging": {
+            "level": "DEBUG",
+            "prefix": "[KRAKEND]",
+            "syslog": false,
+            "stdout": true,
+            "format": "logstash"
+        },
+        "github_com/devopsfaith/krakend-opencensus": {
+            "sample_rate": 100,
+            "reporting_period": 1,
+            "exporters": {
+                "jaeger": {
+                    "endpoint": "http://jaeger:14268/api/traces",
+                    "service_name": "krakend"
+                }
+            }
+        },
+        "github_com/devopsfaith/krakend-logstash": {
+            "enabled": true
+        },
+        "github_com/devopsfaith/krakend-cors": {
+            "allow_origins": ["http://localhost:8080", "http://localhost:3000", "http://192.168.99.100:3000"],
+            "allow_methods": ["POST", "GET"],
+            "allow_headers": ["Origin", "Authorization", "Content-Type"],
+            "expose_headers": ["Content-Length"],
+            "max_age": "12h"
+        },
+        "github_com/devopsfaith/bloomfilter": {
+            "N": 10000000,
+            "P": 0.0000001,
+            "HashName": "optimal",
+            "TTL": 1500,
+            "port": 1234,
+            "TokenKeys": ["jti"]
+        }
+    },
     "endpoints": [{
-            "endpoint": "/users/{user}",
-            "method": "GET",
-            "backend": [{
-                    "host": [
-                        "http://127.0.0.3:9000",
-                        "http://127.0.0.4"
-                    ],
-                    "url_pattern": "/registered/{user}",
-                    "whitelist": [
-                        "some",
-                        "what"
-                    ],
-                    "mapping": {
-                        "email": "personal_email"
-                    }
-                },
-                {
-                    "host": [
-                        "http://127.0.0.1:8080"
-                    ],
-                    "url_pattern": "/users/{user}/permissions",
-                    "blacklist": [
-                        "spam2",
-                        "notwanted2"
-                    ]
-                }
-            ],
-            "concurrent_calls": 2,
-            "timeout": "1000s",
-            "cache_ttl": 3600,
-            "querystring_params": [
-                "page",
-                "limit"
-            ]
-        },
-        {
-            "endpoint": "/foo/bar",
+            "endpoint": "/svc/c/post",
             "method": "POST",
+            "output_encoding": "json",
+            "extra_config": {},
+            "querystring_params": [],
             "backend": [{
+                "url_pattern": "/rz/rpc.svcc.CService/CallServiceC",
+                "encoding": "json",
+                "sd": "custom",
+                "method": "POST",
+                "extra_config": {
+                    "github.com/devopsfaith/krakend-martian": null
+                },
                 "host": [
-                    "https://127.0.0.1:8081"
+                    "http://localhost:8083"
                 ],
-                "url_pattern": "/__debug/tupu"
-            }],
-            "concurrent_calls": 1,
-            "timeout": "1000s",
-            "cache_ttl": 3600
+                "disable_host_sanitize": true
+            }]
         },
         {
-            "endpoint": "/github",
+            "endpoint": "/svc/{count}/get",
             "method": "GET",
+            "output_encoding": "json",
+            "querystring_params": [
+                "*"
+            ],
+            "headers_to_pass": [
+                "*"
+            ],
             "backend": [{
+                "url_pattern": "/rz/rpc.svcc.CService/CallServiceC",
+                "encoding": "json",
+                "sd": "custom",
+                "method": "POST",
+                "extra_config": {
+                    "github.com/devopsfaith/krakend-martian": {
+                        "fifo.Group": {
+                            "scope": ["request", "response"],
+                            "aggregateErrors": true,
+                            "modifiers": [{
+                                "body.Modifier": {
+                                    "scope": ["request", "response"],
+                                    "body": "eyJtc2ciOiJ5b3Ugcm9jayEifQ=="
+                                }
+                            }]
+                        }
+                    }
+                },
                 "host": [
-                    "https://api.github.com"
+                    "http://localhost:8083"
+
                 ],
-                "url_pattern": "/",
-                "whitelist": [
-                    "authorizations_url",
-                    "code_search_url"
+                "disable_host_sanitize": true
+            }]
+        }, {
+            "endpoint": "/health",
+            "method": "GET",
+            "output_encoding": "no-op",
+            "extra_config": {},
+            "backend": [{
+                "url_pattern": "/health",
+                "encoding": "no-op",
+                "sd": "custom",
+                "method": "GET",
+                "extra_config": {},
+                "disable_host_sanitize": true,
+                "host": [
+                    "http://localhost:8083"
                 ]
-            }],
-            "concurrent_calls": 2,
-            "timeout": "1000s",
-            "cache_ttl": 3600
+            }]
         },
         {
-            "endpoint": "/combination/{id}/{supu}",
+            "endpoint": "/users/{user_id}/settings",
             "method": "GET",
+            "output_encoding": "json",
+            "extra_config": {
+
+            },
             "backend": [{
-                    "group": "first_post",
-                    "host": [
-                        "https://jsonplaceholder.typicode.com"
-                    ],
-                    "url_pattern": "/posts/{id}?supu={supu}",
-                    "blacklist": [
-                        "userId"
-                    ]
+                "url_pattern": "/7/settingslist/get",
+                "encoding": "xml",
+                "sd": "custom",
+                "method": "POST",
+                "extra_config": {
+                    "github.com/devopsfaith/krakend-martian": {
+                        "body.FromQuerystring": {
+                            "keys_to_extract": [
+                                "count"
+                            ],
+                            "template": "{\"count\":\"{{index .count 0}}\"}",
+                            "method": "POST"
+                        }
+                    }
+                },
+                "host": [
+                    "https://tasty-chicken-83.loca.lt"
+                ],
+                "disable_host_sanitize": true
+            }],
+            "querystring_params": [
+                "user_id"
+            ]
+        },
+        {
+            "endpoint": "/splash",
+            "backend": [{
+                    "url_pattern": "/shop/campaigns.json",
+                    "whitelist": ["campaigns"]
                 },
                 {
-                    "host": [
-                        "https://jsonplaceholder.typicode.com"
-                    ],
-                    "url_pattern": "/users/{id}",
-                    "mapping": {
-                        "email": "personal_email"
+                    "url_pattern": "/shop/products.json",
+                    "whitelist": ["products"],
+                    "extra_config": {
+                        "github.com/devopsfaith/krakend-ratelimit/juju/proxy": {
+                            "maxRate": 1,
+                            "capacity": 1
+                        }
                     }
                 }
             ],
-            "concurrent_calls": 3,
-            "timeout": "1000s",
-            "querystring_params": [
-                "page",
-                "limit"
+            "extra_config": {
+                "github.com/devopsfaith/krakend-ratelimit/juju/router": {
+                    "maxRate": 2
+                }
+            }
+        },
+        {
+            "endpoint": "/sequential",
+            "backend": [{
+                    "url_pattern": "/hotels/1.json",
+                    "whitelist": ["destination_id"]
+                },
+                {
+                    "url_pattern": "/destinations/{resp0_destination_id}.json"
+                }
+            ],
+            "extra_config": {
+                "github.com/devopsfaith/krakend/proxy": {
+                    "sequential": true
+                }
+            }
+        },
+        {
+            "endpoint": "/fail",
+            "backend": [{
+                    "url_pattern": "/user/1.json",
+                    "group": "user"
+                },
+                {
+                    "host": ["http://fake_url_that_should_not_resolve.tld"],
+                    "url_pattern": "/",
+                    "group": "none"
+                }
             ]
+        },
+        {
+            "endpoint": "/public",
+            "backend": [{
+                    "host": ["https://api.github.com"],
+                    "url_pattern": "/users/kpacha",
+                    "whitelist": [
+                        "avatar_url",
+                        "name",
+                        "company",
+                        "blog",
+                        "location",
+                        "mail",
+                        "hireable",
+                        "followers",
+                        "public_repos",
+                        "public_gists"
+                    ],
+                    "mapping": { "blog": "website" },
+                    "group": "github"
+                },
+                {
+                    "host": ["https://api.bitbucket.org"],
+                    "url_pattern": "/2.0/users/kpacha",
+                    "whitelist": [
+                        "links.avatar",
+                        "display_name",
+                        "website",
+                        "location"
+                    ],
+                    "mapping": { "display_name": "name" },
+                    "group": "bitbucket"
+                }
+            ]
+        },
+        {
+            "endpoint": "/private/auth0",
+            "backend": [{
+                "url_pattern": "/user/1.json"
+            }],
+            "extra_config": {
+                "github.com/devopsfaith/krakend-jose/validator": {
+                    "alg": "RS256",
+                    "audience": ["http://api.example.com"],
+                    "roles_key": "http://api.example.com/custom/roles",
+                    "roles": ["user", "admin"],
+                    "jwk-url": "https://albert-test.auth0.com/.well-known/jwks.json"
+                }
+            }
+        },
+        {
+            "endpoint": "/private/custom",
+            "backend": [{
+                "url_pattern": "/user/1.json"
+            }],
+            "extra_config": {
+                "github.com/devopsfaith/krakend-jose/validator": {
+                    "alg": "HS256",
+                    "audience": ["http://api.example.com"],
+                    "roles_key": "roles",
+                    "issuer": "https://krakend.io",
+                    "roles": ["role_a", "role_c"],
+                    "jwk-url": "http://fake_api:8080/jwk/symmetric.json",
+                    "disable_jwk_security": true
+                }
+            }
+        },
+        {
+            "endpoint": "/token",
+            "backend": [{
+                "url_pattern": "/token.json"
+            }],
+            "extra_config": {
+                "github.com/devopsfaith/krakend-jose/signer": {
+                    "alg": "HS256",
+                    "kid": "sim2",
+                    "keys-to-sign": ["access_token", "refresh_token"],
+                    "jwk-url": "http://fake_api:8080/jwk/symmetric.json",
+                    "disable_jwk_security": true
+                }
+            }
         }
     ]
 }
