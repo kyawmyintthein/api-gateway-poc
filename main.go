@@ -4,18 +4,21 @@ import (
 	"context"
 	"flag"
 	"log"
+	"net/http"
 	"os"
 
 	gologging "github.com/devopsfaith/krakend-gologging"
-	martian "github.com/devopsfaith/krakend-martian"
 	viper "github.com/devopsfaith/krakend-viper"
 	"github.com/gin-gonic/gin"
 	_ "github.com/kpacha/martian-components/body/querystring2body"
+	krakendtwirp "github.com/kyawmyintthein/api-gateway-poc/krakend-twirp"
 	_ "github.com/kyawmyintthein/api-gateway-poc/requestbodytransformer"
+	svcc "github.com/kyawmyintthein/api-gateway-poc/rpc/svc_c"
 	"github.com/luraproject/lura/proxy"
 	krakendgin "github.com/luraproject/lura/router/gin"
 	"github.com/luraproject/lura/transport/http/client"
 	"github.com/luraproject/lura/transport/http/server"
+	"github.com/twitchtv/twirp"
 )
 
 func main() {
@@ -43,14 +46,21 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	backendFactory := martian.NewBackendFactory(logger, client.DefaultHTTPRequestExecutor(client.NewHTTPClient))
+	//backendFactory := martian.NewBackendFactory(logger, client.DefaultHTTPRequestExecutor(client.NewHTTPClient))
 
+	svccLuraClient, err := svcc.NewCServiceLuraClient(&serviceConfig, "rpc.svcc.CService", http.DefaultClient, twirp.WithClientPathPrefix("rz"))
+	if err != nil {
+		panic(err)
+	}
+	krakendtwirp.RegisterClients(svccLuraClient)
+
+	bf := krakendtwirp.NewTwirpProxy(logger, proxy.CustomHTTPProxyFactory(client.NewHTTPClient))
 	routerFactory := krakendgin.NewFactory(krakendgin.Config{
 		Engine:         gin.Default(),
 		Logger:         logger,
 		Middlewares:    []gin.HandlerFunc{},
 		HandlerFactory: krakendgin.EndpointHandler,
-		ProxyFactory:   proxy.NewDefaultFactory(backendFactory, logger),
+		ProxyFactory:   proxy.NewDefaultFactory(bf, logger),
 		RunServer:      server.RunServer,
 	})
 
