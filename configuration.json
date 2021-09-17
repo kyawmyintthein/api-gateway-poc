@@ -61,7 +61,12 @@
                 "sd": "custom",
                 "method": "POST",
                 "extra_config": {
-                    "github.com/devopsfaith/krakend-martian": null
+                    "github.com/devopsfaith/krakend-martian": {
+                        "body.FromRequestBody": {
+                            "template": "WwogICAgewogICJvcGVyYXRpb24iOiAic2hpZnQiLAogICJzcGVjIjogewogICAgImNvdW50IjogInJlcXVlc3QuY291bnQiCiAgfQp9Cl0=",
+                            "method": "POST"
+                        }
+                    }
                 },
                 "host": [
                     "http://localhost:8083"
@@ -80,21 +85,18 @@
                 "*"
             ],
             "backend": [{
-                "url_pattern": "/rz/rpc.svcc.CService/CallServiceC",
+                "url_pattern": "/rz/rpc.svcc.CService/CallServiceC?count={count}",
                 "encoding": "json",
                 "sd": "custom",
                 "method": "POST",
                 "extra_config": {
                     "github.com/devopsfaith/krakend-martian": {
-                        "fifo.Group": {
-                            "scope": ["request", "response"],
-                            "aggregateErrors": true,
-                            "modifiers": [{
-                                "body.Modifier": {
-                                    "scope": ["request", "response"],
-                                    "body": "eyJtc2ciOiJ5b3Ugcm9jayEifQ=="
-                                }
-                            }]
+                        "body.FromQuerystring": {
+                            "keys_to_extract": [
+                                "count"
+                            ],
+                            "template": "{\"count\":\"{{index .count 0}}\"}",
+                            "method": "POST"
                         }
                     }
                 },
@@ -102,9 +104,11 @@
                     "http://localhost:8083"
 
                 ],
+
                 "disable_host_sanitize": true
             }]
-        }, {
+        },
+        {
             "endpoint": "/health",
             "method": "GET",
             "output_encoding": "no-op",
