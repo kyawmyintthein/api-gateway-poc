@@ -107,7 +107,7 @@
                     }
                 },
                 "host": [
-                    "http://localhost:8083"
+                    "https://localhost:8083"
 
                 ],
 
@@ -161,7 +161,7 @@
                 "extra_config": {},
                 "disable_host_sanitize": true,
                 "host": [
-                    "http://localhost:8083"
+                    "https://localhost:8083"
                 ]
             }]
         }

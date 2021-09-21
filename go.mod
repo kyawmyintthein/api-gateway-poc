@@ -20,6 +20,7 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/spf13/viper v1.8.1 // indirect
 	github.com/twitchtv/twirp v8.1.0+incompatible
+	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/qntfy/kazaam.v3 v3.4.9
 )

@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +16,7 @@ import (
 	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/querystring2body"
 	svcc "github.com/kyawmyintthein/api-gateway-poc/rpc/svcc"
 	luratwirp "github.com/kyawmyintthein/lura-twirp"
+	"golang.org/x/net/http2"
 
 	"github.com/luraproject/lura/proxy"
 	krakendgin "github.com/luraproject/lura/router/gin"
@@ -47,7 +51,9 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	//backendFactory := martian.NewBackendFactory(logger, client.DefaultHTTPRequestExecutor(client.NewHTTPClient))
-	svccLuraClient, err := svcc.NewCServiceLuraClient(&serviceConfig, "rpc.svcc.CService", http.DefaultClient, logger, twirp.WithClientPathPrefix("rz"))
+	svccLuraClient, err := svcc.NewCServiceLuraClient(&serviceConfig, "rpc.svcc.CService", &http.Client{
+		Transport: transport2(),
+	}, logger, twirp.WithClientPathPrefix("rz"))
 	if err != nil {
 		panic(err)
 	}
@@ -66,4 +72,28 @@ func main() {
 	routerFactory.NewWithContext(ctx).Run(serviceConfig)
 
 	cancel()
+}
+
+func transport2() *http2.Transport {
+	return &http2.Transport{
+		TLSClientConfig:    tlsConfig(),
+		DisableCompression: true,
+		AllowHTTP:          false,
+	}
+}
+
+func tlsConfig() *tls.Config {
+	crt, err := ioutil.ReadFile("./server.crt")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rootCAs := x509.NewCertPool()
+	rootCAs.AppendCertsFromPEM(crt)
+
+	return &tls.Config{
+		RootCAs:            rootCAs,
+		InsecureSkipVerify: false,
+		ServerName:         "localhost",
+	}
 }
