@@ -27,6 +27,7 @@ type Query2BodyModifier struct {
 }
 
 func (m *Query2BodyModifier) ModifyRequest(req *http.Request) error {
+	log.Println("Request received")
 	if req.Body == nil {
 		return nil
 	}

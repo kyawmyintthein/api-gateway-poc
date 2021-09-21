@@ -6,8 +6,8 @@ import (
 )
 
 func init() {
-	parse.Register("body.FromRequestBody", FromJSON)
-	parse.Register("body.ToResponseBody", FromRespJSON)
+	// parse.Register("body.FromRequestBody", FromJSON)
+	// parse.Register("body.ToResponseBody", FromRespJSON)
 }
 
 func FromJSON(b []byte) (*parse.Result, error) {

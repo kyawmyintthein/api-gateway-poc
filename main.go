@@ -10,10 +10,10 @@ import (
 	gologging "github.com/devopsfaith/krakend-gologging"
 	viper "github.com/devopsfaith/krakend-viper"
 	"github.com/gin-gonic/gin"
-	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/querystringtobody"
-	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/requestbodytransformer"
+	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/querystring2body"
 	svcc "github.com/kyawmyintthein/api-gateway-poc/rpc/svcc"
 	luratwirp "github.com/kyawmyintthein/lura-twirp"
+
 	"github.com/luraproject/lura/proxy"
 	krakendgin "github.com/luraproject/lura/router/gin"
 	"github.com/luraproject/lura/transport/http/client"
@@ -47,14 +47,13 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	//backendFactory := martian.NewBackendFactory(logger, client.DefaultHTTPRequestExecutor(client.NewHTTPClient))
-
 	svccLuraClient, err := svcc.NewCServiceLuraClient(&serviceConfig, "rpc.svcc.CService", http.DefaultClient, logger, twirp.WithClientPathPrefix("rz"))
 	if err != nil {
 		panic(err)
 	}
 	luratwirp.RegisterTwirpStubs(logger, svccLuraClient)
 
-	bf := luratwirp.NewTwirpProxy(logger, proxy.CustomHTTPProxyFactory(client.NewHTTPClient))
+	bf := luratwirp.NewTwirpProxy(logger, client.DefaultHTTPRequestExecutor(client.NewHTTPClient))
 	routerFactory := krakendgin.NewFactory(krakendgin.Config{
 		Engine:         gin.Default(),
 		Logger:         logger,

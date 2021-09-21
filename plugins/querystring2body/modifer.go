@@ -2,7 +2,7 @@ package querystringtobody
 
 import (
 	"github.com/google/martian/parse"
-	"github.com/kyawmyintthein/api-gateway-poc/plugins/querystringtobody/modifier"
+	"github.com/kyawmyintthein/api-gateway-poc/plugins/querystring2body/modifier"
 )
 
 func init() {

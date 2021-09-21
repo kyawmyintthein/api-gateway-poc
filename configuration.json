@@ -59,9 +59,6 @@
             "headers_to_pass": [
                 "*"
             ],
-            "extra_config": {
-                "twirp_service_identifier": "rpc.svcc.CService"
-            },
             "backend": [{
                 "url_pattern": "/rz/rpc.svcc.CService/CallServiceC",
                 "encoding": "json",
@@ -70,6 +67,44 @@
                 "method": "CallServiceC",
                 "extra_config": {
                     "twirp_service_identifier": "rpc.svcc.CService"
+                },
+                "host": [
+                    "http://localhost:8083"
+
+                ],
+
+                "disable_host_sanitize": true
+            }]
+        },
+        {
+            "endpoint": "/rpc/{count}/get",
+            "method": "GET",
+            "output_encoding": "json",
+            "querystring_params": [
+                "*"
+            ],
+            "headers_to_pass": [
+                "*"
+            ],
+            "extra_config": {
+                "twirp_service_identifier": "rpc.svcc.CService"
+            },
+            "backend": [{
+                "url_pattern": "/rz/rpc.svcc.CService/CallServiceC?count={count}",
+                "encoding": "json",
+                "sd": "custom",
+                "method": "CallServiceC",
+                "extra_config": {
+                    "twirp_service_identifier": "rpc.svcc.CService",
+                    "github.com/kyawmyintthein/lura-twirp/martian": {
+                        "body.FromQueryString": {
+                            "keys_to_extract": [
+                                "count"
+                            ],
+                            "template": "{\"count\":{{index .count 0}}}",
+                            "method": "POST"
+                        }
+                    }
                 },
                 "host": [
                     "http://localhost:8083"
@@ -89,23 +124,19 @@
             "headers_to_pass": [
                 "*"
             ],
-            "extra_config": {
-                "twirp_service_identifier": "rpc.svcc.CService"
-            },
+
             "backend": [{
                 "url_pattern": "/rz/rpc.svcc.CService/CallServiceC?count={count}",
                 "encoding": "json",
                 "sd": "custom",
-                "service": "/rz/rpc.svcc.CService",
-                "method": "CallServiceC",
+                "method": "POST",
                 "extra_config": {
-                    "twirp_service_identifier": "rpc.svcc.CService",
-                    "github.com/devopsfaith/krakend-martian": {
-                        "body.FromQuerystring": {
+                    "github.com/kyawmyintthein/lura-twirp/martian": {
+                        "body.FromQueryString": {
                             "keys_to_extract": [
                                 "count"
                             ],
-                            "template": "{\"count\":\"{{index .count 0}}\"}",
+                            "template": "{\"count\":{{index .count 0}}}",
                             "method": "POST"
                         }
                     }
@@ -114,7 +145,6 @@
                     "http://localhost:8083"
 
                 ],
-
                 "disable_host_sanitize": true
             }]
         },
@@ -134,171 +164,6 @@
                     "http://localhost:8083"
                 ]
             }]
-        },
-        {
-            "endpoint": "/users/{user_id}/settings",
-            "method": "GET",
-            "output_encoding": "json",
-            "extra_config": {
-
-            },
-            "backend": [{
-                "url_pattern": "/7/settingslist/get",
-                "encoding": "xml",
-                "sd": "custom",
-                "method": "POST",
-                "extra_config": {
-                    "github.com/devopsfaith/krakend-martian": {
-                        "body.FromQuerystring": {
-                            "keys_to_extract": [
-                                "count"
-                            ],
-                            "template": "{\"count\":\"{{index .count 0}}\"}",
-                            "method": "POST"
-                        }
-                    }
-                },
-                "host": [
-                    "https://tasty-chicken-83.loca.lt"
-                ],
-                "disable_host_sanitize": true
-            }],
-            "querystring_params": [
-                "user_id"
-            ]
-        },
-        {
-            "endpoint": "/splash",
-            "backend": [{
-                    "url_pattern": "/shop/campaigns.json",
-                    "whitelist": ["campaigns"]
-                },
-                {
-                    "url_pattern": "/shop/products.json",
-                    "whitelist": ["products"],
-                    "extra_config": {
-                        "github.com/devopsfaith/krakend-ratelimit/juju/proxy": {
-                            "maxRate": 1,
-                            "capacity": 1
-                        }
-                    }
-                }
-            ],
-            "extra_config": {
-                "github.com/devopsfaith/krakend-ratelimit/juju/router": {
-                    "maxRate": 2
-                }
-            }
-        },
-        {
-            "endpoint": "/sequential",
-            "backend": [{
-                    "url_pattern": "/hotels/1.json",
-                    "whitelist": ["destination_id"]
-                },
-                {
-                    "url_pattern": "/destinations/{resp0_destination_id}.json"
-                }
-            ],
-            "extra_config": {
-                "github.com/devopsfaith/krakend/proxy": {
-                    "sequential": true
-                }
-            }
-        },
-        {
-            "endpoint": "/fail",
-            "backend": [{
-                    "url_pattern": "/user/1.json",
-                    "group": "user"
-                },
-                {
-                    "host": ["http://fake_url_that_should_not_resolve.tld"],
-                    "url_pattern": "/",
-                    "group": "none"
-                }
-            ]
-        },
-        {
-            "endpoint": "/public",
-            "backend": [{
-                    "host": ["https://api.github.com"],
-                    "url_pattern": "/users/kpacha",
-                    "whitelist": [
-                        "avatar_url",
-                        "name",
-                        "company",
-                        "blog",
-                        "location",
-                        "mail",
-                        "hireable",
-                        "followers",
-                        "public_repos",
-                        "public_gists"
-                    ],
-                    "mapping": { "blog": "website" },
-                    "group": "github"
-                },
-                {
-                    "host": ["https://api.bitbucket.org"],
-                    "url_pattern": "/2.0/users/kpacha",
-                    "whitelist": [
-                        "links.avatar",
-                        "display_name",
-                        "website",
-                        "location"
-                    ],
-                    "mapping": { "display_name": "name" },
-                    "group": "bitbucket"
-                }
-            ]
-        },
-        {
-            "endpoint": "/private/auth0",
-            "backend": [{
-                "url_pattern": "/user/1.json"
-            }],
-            "extra_config": {
-                "github.com/devopsfaith/krakend-jose/validator": {
-                    "alg": "RS256",
-                    "audience": ["http://api.example.com"],
-                    "roles_key": "http://api.example.com/custom/roles",
-                    "roles": ["user", "admin"],
-                    "jwk-url": "https://albert-test.auth0.com/.well-known/jwks.json"
-                }
-            }
-        },
-        {
-            "endpoint": "/private/custom",
-            "backend": [{
-                "url_pattern": "/user/1.json"
-            }],
-            "extra_config": {
-                "github.com/devopsfaith/krakend-jose/validator": {
-                    "alg": "HS256",
-                    "audience": ["http://api.example.com"],
-                    "roles_key": "roles",
-                    "issuer": "https://krakend.io",
-                    "roles": ["role_a", "role_c"],
-                    "jwk-url": "http://fake_api:8080/jwk/symmetric.json",
-                    "disable_jwk_security": true
-                }
-            }
-        },
-        {
-            "endpoint": "/token",
-            "backend": [{
-                "url_pattern": "/token.json"
-            }],
-            "extra_config": {
-                "github.com/devopsfaith/krakend-jose/signer": {
-                    "alg": "HS256",
-                    "kid": "sim2",
-                    "keys-to-sign": ["access_token", "refresh_token"],
-                    "jwk-url": "http://fake_api:8080/jwk/symmetric.json",
-                    "disable_jwk_security": true
-                }
-            }
         }
     ]
 }

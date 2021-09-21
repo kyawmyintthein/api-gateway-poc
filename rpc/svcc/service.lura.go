@@ -73,7 +73,7 @@ func getBaseURLByCServiceClientID(config *config.ServiceConfig) (string, error) 
 			}
 		}
 	}
-	return "", twirp.InternalError(fmt.Sprintf("invalid %s", luratwirp.TwirpServiceIdentifierConst))
+	return "", twirp.InternalError(fmt.Sprintf("[getBaseURL]invalid %s", luratwirp.TwirpServiceIdentifierConst))
 }
 
 // ==============================================================
