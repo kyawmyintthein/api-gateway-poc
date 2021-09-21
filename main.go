@@ -13,6 +13,7 @@ import (
 	gologging "github.com/devopsfaith/krakend-gologging"
 	viper "github.com/devopsfaith/krakend-viper"
 	"github.com/gin-gonic/gin"
+	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/payload2body"
 	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/querystring2body"
 	svcc "github.com/kyawmyintthein/api-gateway-poc/rpc/svcc"
 	luratwirp "github.com/kyawmyintthein/lura-twirp"
@@ -51,9 +52,7 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	//backendFactory := martian.NewBackendFactory(logger, client.DefaultHTTPRequestExecutor(client.NewHTTPClient))
-	svccLuraClient, err := svcc.NewCServiceLuraClient(&serviceConfig, "rpc.svcc.CService", &http.Client{
-		Transport: transport2(),
-	}, logger, twirp.WithClientPathPrefix("rz"))
+	svccLuraClient, err := svcc.NewCServiceLuraClient(&serviceConfig, "rpc.svcc.CService", &http.Client{}, logger, twirp.WithClientPathPrefix("rz"))
 	if err != nil {
 		panic(err)
 	}

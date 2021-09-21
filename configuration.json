@@ -50,7 +50,7 @@
         }
     },
     "endpoints": [{
-            "endpoint": "/svcc/post",
+            "endpoint": "/svc/post",
             "method": "POST",
             "output_encoding": "json",
             "querystring_params": [
@@ -63,10 +63,50 @@
                 "url_pattern": "/rz/rpc.svcc.CService/CallServiceC",
                 "encoding": "json",
                 "sd": "custom",
+                "method": "POST",
+                "extra_config": {
+                    "github.com/kyawmyintthein/lura-twirp/martian": {
+                        "body.FromPayload": {
+                            "template": "W3sKICAib3BlcmF0aW9uIjogInNoaWZ0IiwKICAic3BlYyI6IHsKICAgICJjb3VudCI6ICJyZXF1ZXN0LmNvdW50IgogIH0KfV0=",
+                            "method": "POST"
+                        }
+                    }
+                },
+                "host": [
+                    "http://localhost:8083"
+
+                ],
+
+                "disable_host_sanitize": true
+            }]
+        },
+        {
+            "endpoint": "/rpc/post",
+            "method": "POST",
+            "output_encoding": "json",
+            "querystring_params": [
+                "*"
+            ],
+            "headers_to_pass": [
+                "*"
+            ],
+            "extra_config": {
+                "twirp_service_identifier": "rpc.svcc.CService"
+            },
+            "backend": [{
+                "url_pattern": "/rz/rpc.svcc.CService/CallServiceC",
+                "encoding": "json",
+                "sd": "custom",
                 "service": "/rz/rpc.svcc.CService",
                 "method": "CallServiceC",
                 "extra_config": {
-                    "twirp_service_identifier": "rpc.svcc.CService"
+                    "twirp_service_identifier": "rpc.svcc.CService",
+                    "github.com/kyawmyintthein/lura-twirp/martian": {
+                        "body.FromPayload": {
+                            "template": "W3sKICAib3BlcmF0aW9uIjogInNoaWZ0IiwKICAic3BlYyI6IHsKICAgICJjb3VudCI6ICJyZXF1ZXN0LmNvdW50IgogIH0KfV0=",
+                            "method": "POST"
+                        }
+                    }
                 },
                 "host": [
                     "http://localhost:8083"
@@ -107,7 +147,7 @@
                     }
                 },
                 "host": [
-                    "https://localhost:8083"
+                    "http://localhost:8083"
 
                 ],
 
