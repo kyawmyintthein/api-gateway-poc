@@ -10,7 +10,7 @@ import (
 	gologging "github.com/devopsfaith/krakend-gologging"
 	viper "github.com/devopsfaith/krakend-viper"
 	"github.com/gin-gonic/gin"
-	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/querystring2body"
+	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/querystringtobody"
 	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/requestbodytransformer"
 	svcc "github.com/kyawmyintthein/api-gateway-poc/rpc/svcc"
 	luratwirp "github.com/kyawmyintthein/lura-twirp"
