@@ -10,10 +10,10 @@ import (
 	gologging "github.com/devopsfaith/krakend-gologging"
 	viper "github.com/devopsfaith/krakend-viper"
 	"github.com/gin-gonic/gin"
-	_ "github.com/kpacha/martian-components/body/querystring2body"
-	krakendtwirp "github.com/kyawmyintthein/api-gateway-poc/krakend-twirp"
-	_ "github.com/kyawmyintthein/api-gateway-poc/requestbodytransformer"
-	svcc "github.com/kyawmyintthein/api-gateway-poc/rpc/svc_c"
+	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/querystring2body"
+	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/requestbodytransformer"
+	svcc "github.com/kyawmyintthein/api-gateway-poc/rpc/svcc"
+	luratwirp "github.com/kyawmyintthein/lura-twirp"
 	"github.com/luraproject/lura/proxy"
 	krakendgin "github.com/luraproject/lura/router/gin"
 	"github.com/luraproject/lura/transport/http/client"
@@ -48,13 +48,13 @@ func main() {
 
 	//backendFactory := martian.NewBackendFactory(logger, client.DefaultHTTPRequestExecutor(client.NewHTTPClient))
 
-	svccLuraClient, err := svcc.NewCServiceLuraClient(&serviceConfig, "rpc.svcc.CService", http.DefaultClient, twirp.WithClientPathPrefix("rz"))
+	svccLuraClient, err := svcc.NewCServiceLuraClient(&serviceConfig, "rpc.svcc.CService", http.DefaultClient, logger, twirp.WithClientPathPrefix("rz"))
 	if err != nil {
 		panic(err)
 	}
-	krakendtwirp.RegisterClients(svccLuraClient)
+	luratwirp.RegisterTwirpStubs(logger, svccLuraClient)
 
-	bf := krakendtwirp.NewTwirpProxy(logger, proxy.CustomHTTPProxyFactory(client.NewHTTPClient))
+	bf := luratwirp.NewTwirpProxy(logger, proxy.CustomHTTPProxyFactory(client.NewHTTPClient))
 	routerFactory := krakendgin.NewFactory(krakendgin.Config{
 		Engine:         gin.Default(),
 		Logger:         logger,

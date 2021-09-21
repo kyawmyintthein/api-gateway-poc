@@ -2,7 +2,7 @@ package requestbodytransformer
 
 import (
 	"github.com/google/martian/parse"
-	"github.com/kyawmyintthein/api-gateway-poc/requestbodytransformer/modifier"
+	"github.com/kyawmyintthein/api-gateway-poc/plugins/requestbodytransformer/modifier"
 )
 
 func init() {
