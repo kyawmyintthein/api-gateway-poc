@@ -1,12 +1,12 @@
-package requestbodytransformer
+package querystringtobody
 
 import (
 	"github.com/google/martian/parse"
-	"github.com/kyawmyintthein/api-gateway-poc/plugins/payload2body/modifier"
+	"github.com/kyawmyintthein/api-gateway-poc/plugins/header2body/modifier"
 )
 
 func init() {
-	parse.Register("body.FromPayload", FromJSON)
+	parse.Register("body.FromHeader", FromJSON)
 }
 
 func FromJSON(b []byte) (*parse.Result, error) {

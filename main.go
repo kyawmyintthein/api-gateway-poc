@@ -8,12 +8,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 
 	gologging "github.com/devopsfaith/krakend-gologging"
 	viper "github.com/devopsfaith/krakend-viper"
 	"github.com/gin-gonic/gin"
-	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/payload2body"
+	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/bodymodifier"
+	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/header2body"
 	_ "github.com/kyawmyintthein/api-gateway-poc/plugins/querystring2body"
 	svcc "github.com/kyawmyintthein/api-gateway-poc/rpc/svcc"
 	luratwirp "github.com/kyawmyintthein/lura-twirp"
@@ -67,7 +69,9 @@ func main() {
 		ProxyFactory:   proxy.NewDefaultFactory(bf, logger),
 		RunServer:      server.RunServer,
 	})
-
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 	routerFactory.NewWithContext(ctx).Run(serviceConfig)
 
 	cancel()
